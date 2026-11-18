@@ -1,0 +1,112 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detect Disease | PlantCare AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<nav class="navbar navbar-light bg-white border-bottom">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">PlantCare AI</a>
+        <a href="/" class="nav-link">Home</a>
+    </div>
+</nav>
+
+<main class="container upload-page">
+    <div class="page-heading">
+        <span class="eyebrow">PLANT HEALTH SCANNER</span>
+        <h1>Analyze a plant leaf</h1>
+        <p class="text-secondary">
+            Upload a clear image to prepare it for AI analysis.
+        </p>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endif %}
+
+    <form action="/detect" method="POST" enctype="multipart/form-data"
+          class="upload-card" id="uploadForm">
+        <label for="plant_image" class="upload-area">
+            <div class="upload-symbol">+</div>
+            <h4>Select a leaf image</h4>
+            <p class="text-secondary mb-2">
+                Choose a JPG, JPEG or PNG file from your device.
+            </p>
+            <span class="btn btn-outline-success">Browse Images</span>
+        </label>
+
+        <input type="file" name="plant_image" id="plant_image"
+               accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+               class="visually-hidden" required>
+
+        <div id="previewContainer" class="preview-container d-none">
+            <img id="imagePreview" alt="Selected plant leaf preview">
+            <p id="fileName" class="small text-secondary mt-2"></p>
+        </div>
+
+        <div class="upload-guidelines">
+            <strong>For a better result</strong>
+            <ul>
+                <li>Keep the leaf clearly visible.</li>
+                <li>Use good lighting and avoid blurry pictures.</li>
+                <li>Include visible symptoms if the leaf appears diseased.</li>
+            </ul>
+        </div>
+
+        <button type="submit" class="btn btn-success btn-lg w-100">
+            Prepare Image
+        </button>
+        <p class="small text-secondary text-center mt-3 mb-0">
+            AI disease detection will be enabled after model integration.
+        </p>
+    </form>
+</main>
+
+<script>
+const input = document.getElementById("plant_image");
+const preview = document.getElementById("imagePreview");
+const container = document.getElementById("previewContainer");
+const fileName = document.getElementById("fileName");
+const form = document.getElementById("uploadForm");
+
+input.addEventListener("change", function () {
+    const file = this.files[0];
+
+    if (!file) {
+        container.classList.add("d-none");
+        preview.removeAttribute("src");
+        return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+        alert("Please select an image smaller than 8 MB.");
+        this.value = "";
+        container.classList.add("d-none");
+        return;
+    }
+
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+        alert("Please select a JPG or PNG image.");
+        this.value = "";
+        container.classList.add("d-none");
+        return;
+    }
+
+    preview.src = URL.createObjectURL(file);
+    fileName.textContent = file.name;
+    container.classList.remove("d-none");
+});
+
+form.addEventListener("submit", function () {
+    const button = form.querySelector('button[type="submit"]');
+    button.disabled = true;
+    button.textContent = "Preparing image...";
+});
+</script>
+</body>
+</html>
